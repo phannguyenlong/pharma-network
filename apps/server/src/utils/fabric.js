@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { promises as fsp } from 'fs';
 import { connect, signers } from '@hyperledger/fabric-gateway';
-import grpc from '@grpc/grpc-js';
+import * as grpc from '@grpc/grpc-js';
+import { createPrivateKey } from 'crypto';
 
 function findRepoRoot(startDir = process.cwd()) {
   let current = startDir;
@@ -24,25 +25,25 @@ function getOrgConfig(org) {
   if (org === 'manufacturer') {
     return {
       mspId: 'ManufacturerMSP',
-      peerEndpoint: 'localhost:7051',
-      tlsCertPath: path.join(base, 'manufacturer.pharma.com/peers/peer0.manufacturer.pharma.com/tls/ca.crt'),
-      adminMspPath: path.join(base, 'manufacturer.pharma.com/users/Admin@manufacturer.pharma.com/msp'),
+      peerEndpoint: process.env.MANUFACTURER_PEER_ENDPOINT || 'localhost:7051',
+      tlsCertPath: process.env.MANUFACTURER_TLS_CA || path.join(base, 'manufacturer.pharma.com/peers/peer0.manufacturer.pharma.com/tls/ca.crt'),
+      adminMspPath: process.env.MANUFACTURER_ADMIN_MSP || path.join(base, 'manufacturer.pharma.com/users/Admin@manufacturer.pharma.com/msp'),
     };
   }
   if (org === 'distributor') {
     return {
       mspId: 'DistributorMSP',
-      peerEndpoint: 'localhost:9051',
-      tlsCertPath: path.join(base, 'distributor.pharma.com/peers/peer0.distributor.pharma.com/tls/ca.crt'),
-      adminMspPath: path.join(base, 'distributor.pharma.com/users/Admin@distributor.pharma.com/msp'),
+      peerEndpoint: process.env.DISTRIBUTOR_PEER_ENDPOINT || 'localhost:9051',
+      tlsCertPath: process.env.DISTRIBUTOR_TLS_CA || path.join(base, 'distributor.pharma.com/peers/peer0.distributor.pharma.com/tls/ca.crt'),
+      adminMspPath: process.env.DISTRIBUTOR_ADMIN_MSP || path.join(base, 'distributor.pharma.com/users/Admin@distributor.pharma.com/msp'),
     };
   }
   if (org === 'retailer') {
     return {
       mspId: 'RetailerMSP',
-      peerEndpoint: 'localhost:11051',
-      tlsCertPath: path.join(base, 'retailer.pharma.com/peers/peer0.retailer.pharma.com/tls/ca.crt'),
-      adminMspPath: path.join(base, 'retailer.pharma.com/users/Admin@retailer.pharma.com/msp'),
+      peerEndpoint: process.env.RETAILER_PEER_ENDPOINT || 'localhost:11051',
+      tlsCertPath: process.env.RETAILER_TLS_CA || path.join(base, 'retailer.pharma.com/peers/peer0.retailer.pharma.com/tls/ca.crt'),
+      adminMspPath: process.env.RETAILER_ADMIN_MSP || path.join(base, 'retailer.pharma.com/users/Admin@retailer.pharma.com/msp'),
     };
   }
   throw new Error(`Unknown org: ${org}`);
@@ -65,7 +66,8 @@ async function newSigner(adminMspPath) {
   const keyPath = path.join(adminMspPath, 'keystore');
   const [keyFile] = (await fsp.readdir(keyPath)).filter(f => f.endsWith('_sk') || f.endsWith('.pem'));
   const privateKeyPem = await fsp.readFile(path.join(keyPath, keyFile));
-  return signers.newPrivateKeySigner(await signers.pemToPrivateKey(privateKeyPem));
+  const privateKey = createPrivateKey(privateKeyPem);
+  return signers.newPrivateKeySigner(privateKey);
 }
 
 export async function connectGatewayForOrg(org) {

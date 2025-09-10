@@ -10,14 +10,38 @@ export default function Products() {
   const [error, setError] = React.useState('')
 
   React.useEffect(() => {
-    api.listProducts().then(setItems).catch(e => setError(e.message))
+    setError('')
+    api.listProducts()
+      .then(data => {
+        let arr = []
+        if (Array.isArray(data)) {
+          arr = data
+        } else if (typeof data === 'string') {
+          try { const parsed = JSON.parse(data); if (Array.isArray(parsed)) arr = parsed } catch {}
+        } else if (data && typeof data === 'object') {
+          if (Array.isArray(data.result)) arr = data.result
+          else if (Array.isArray(data.records)) arr = data.records
+          else if (Array.isArray(data.products)) arr = data.products
+        }
+        // Also handle array-of-bytes encoding from server
+        if (arr.length && typeof arr[0] === 'number') {
+          try {
+            const text = new TextDecoder().decode(Uint8Array.from(arr))
+            const parsed = JSON.parse(text)
+            if (Array.isArray(parsed)) arr = parsed
+          } catch {}
+        }
+        setItems(arr)
+      })
+      .catch(e => setError(e.message))
   }, [org])
 
   return (
     <div>
       <h3>Products</h3>
       {error && <p style={{ color: 'crimson' }}>Error: {error}</p>}
-      <table cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {items.length === 0 && !error && <p>No products found.</p>}
+      <table cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse', display: items.length ? 'table' : 'none' }}>
         <thead>
           <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
             <th>ID</th>

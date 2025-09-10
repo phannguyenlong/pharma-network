@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { connectGatewayForOrg, getContractForOrg } from './utils/fabric.js';
+// Using native queryInfo to avoid manual protobuf decoding
 
 dotenv.config();
 
@@ -41,6 +42,36 @@ async function withContract(req, res, next) {
   }
 }
 
+function sendMaybeJSON(res, payload) {
+  try {
+    let bytes = null;
+    if (payload == null) {
+      return res.json(null);
+    }
+    if (Buffer.isBuffer(payload)) {
+      bytes = payload;
+    } else if (payload instanceof Uint8Array) {
+      bytes = Buffer.from(payload);
+    } else if (Array.isArray(payload) && payload.length && typeof payload[0] === 'number') {
+      bytes = Buffer.from(Uint8Array.from(payload));
+    }
+    if (!bytes) {
+      // Fallback: attempt to stringify object
+      return res.json(payload);
+    }
+    const text = bytes.toString();
+    try {
+      const obj = JSON.parse(text);
+      return res.json(obj);
+    } catch (_) {
+      res.set('Content-Type', 'application/json');
+      return res.send(text);
+    }
+  } catch (e) {
+    return res.status(500).json({ error: 'Invalid response from chaincode' });
+  }
+}
+
 // Products API
 app.post('/api/products', withContract, async (req, res) => {
   const { productId, name, manufacturer, batchNumber, manufactureDate, expiryDate } = req.body || {};
@@ -49,8 +80,9 @@ app.post('/api/products', withContract, async (req, res) => {
   }
   try {
     const result = await req.fabric.contract.submitTransaction('CreateProduct', productId, name, manufacturer, batchNumber, manufactureDate, expiryDate);
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('CreateProduct error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -60,8 +92,9 @@ app.post('/api/products', withContract, async (req, res) => {
 app.get('/api/products/:id', withContract, async (req, res) => {
   try {
     const result = await req.fabric.contract.evaluateTransaction('QueryProduct', req.params.id);
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('QueryProduct error:', e);
     res.status(404).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -71,8 +104,9 @@ app.get('/api/products/:id', withContract, async (req, res) => {
 app.get('/api/products', withContract, async (req, res) => {
   try {
     const result = await req.fabric.contract.evaluateTransaction('GetAllProducts');
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('GetAllProducts error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -86,8 +120,9 @@ app.post('/api/products/:id/status', withContract, async (req, res) => {
   }
   try {
     const result = await req.fabric.contract.submitTransaction('UpdateProductStatus', req.params.id, status, temperature || '');
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('UpdateProductStatus error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -101,8 +136,9 @@ app.post('/api/products/:id/transfer', withContract, async (req, res) => {
   }
   try {
     const result = await req.fabric.contract.submitTransaction('TransferProduct', req.params.id, newOwner, location);
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('TransferProduct error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -112,8 +148,9 @@ app.post('/api/products/:id/transfer', withContract, async (req, res) => {
 app.get('/api/products/:id/history', withContract, async (req, res) => {
   try {
     const result = await req.fabric.contract.evaluateTransaction('GetProductHistory', req.params.id);
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('GetProductHistory error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -123,8 +160,9 @@ app.get('/api/products/:id/history', withContract, async (req, res) => {
 app.post('/api/products/:id/counterfeit', withContract, async (req, res) => {
   try {
     const result = await req.fabric.contract.submitTransaction('MarkCounterfeit', req.params.id);
-    res.json(JSON.parse(result.toString()));
+    sendMaybeJSON(res, result);
   } catch (e) {
+    console.error('MarkCounterfeit error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
@@ -134,9 +172,12 @@ app.post('/api/products/:id/counterfeit', withContract, async (req, res) => {
 // Monitoring (basic)
 app.get('/api/monitor/channel', withContract, async (req, res) => {
   try {
-    const info = await req.fabric.network.getChannel().queryInfo();
-    res.json({ height: info.height?.toString?.() || String(info.height), currentBlockHash: info.currentBlockHash?.toString('hex') });
+    // Use QSCC to fetch chain info; return raw protobuf as base64 to avoid decode issues
+    const qscc = req.fabric.network.getContract('qscc');
+    const result = await qscc.evaluateTransaction('GetChainInfo', CHANNEL_NAME);
+    res.json({ height: null, currentBlockHash: null, raw: Buffer.from(result).toString('base64') });
   } catch (e) {
+    console.error('Monitor channel error:', e);
     res.status(500).json({ error: e.message });
   } finally {
     await req.fabric.gateway.close();
