@@ -188,6 +188,7 @@ services:
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer0.manufacturer.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer0.manufacturer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.manufacturer.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
@@ -245,6 +246,7 @@ services:
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer1.manufacturer.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer1.manufacturer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.manufacturer.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
@@ -303,6 +305,7 @@ services:
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer0.distributor.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer0.distributor.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.distributor.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
@@ -360,6 +363,7 @@ services:
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer1.distributor.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer1.distributor.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.distributor.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
@@ -418,6 +422,7 @@ services:
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer0.retailer.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer0.retailer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.retailer.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
@@ -468,12 +473,14 @@ services:
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer1retailer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1.retailer:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer1.retailer.pharma.com/msp:/etc/hyperledger/fabric/msp
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer1.retailer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.retailer.pharma.com:/var/hyperledger/production
+      - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
     working_dir: /root
     command: peer node start
     ports:
