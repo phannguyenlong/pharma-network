@@ -91,6 +91,7 @@ function networkDown() {
   rm -rf organizations/peerOrganizations
   rm -rf channel-artifacts
   rm -rf channel-artifacts/*.block
+  rm -rf pharma-supply.tar.gz # delete chaincode package if exists
   
   echo "Network is down!"
 }

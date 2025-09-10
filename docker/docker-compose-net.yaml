@@ -189,6 +189,7 @@ services:
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer0.manufacturer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.manufacturer.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:
@@ -247,6 +248,7 @@ services:
       - ../organizations/peerOrganizations/manufacturer.pharma.com/peers/peer1.manufacturer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.manufacturer.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:
@@ -306,6 +308,7 @@ services:
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer0.distributor.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.distributor.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:
@@ -364,6 +367,7 @@ services:
       - ../organizations/peerOrganizations/distributor.pharma.com/peers/peer1.distributor.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.distributor.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:
@@ -423,6 +427,7 @@ services:
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer0.retailer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer0.retailer.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:
@@ -481,6 +486,7 @@ services:
       - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer1.retailer.pharma.com/tls:/etc/hyperledger/fabric/tls
       - peer1.retailer.pharma.com:/var/hyperledger/production
       - ../configtx/core.yaml:/etc/hyperledger/peercfg/core.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /root
     command: peer node start
     ports:

@@ -12,26 +12,26 @@ export ORDERER_ADMIN_TLS_PRIVATE_KEY=${PWD}/organizations/ordererOrganizations/p
 # Set environment for specific organization
 setGlobals() {
   local USING_ORG=""
-  if [ -z "$OVERRIDE_ORG" ]; then
+  if [ -z "${OVERRIDE_ORG:-}" ]; then
     USING_ORG=$1
   else
     USING_ORG="${OVERRIDE_ORG}"
   fi
   echo "Using organization ${USING_ORG}"
   
-  if [ $USING_ORG = "manufacturer" ]; then
+  if [ "$USING_ORG" = "manufacturer" ]; then
     export CORE_PEER_LOCALMSPID="ManufacturerMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_MANUFACTURER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/manufacturer.pharma.com/users/Admin@manufacturer.pharma.com/msp
     export CORE_PEER_ADDRESS=localhost:7051
     export CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.manufacturer.pharma.com
-  elif [ $USING_ORG = "distributor" ]; then
+  elif [ "$USING_ORG" = "distributor" ]; then
     export CORE_PEER_LOCALMSPID="DistributorMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_DISTRIBUTOR_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/distributor.pharma.com/users/Admin@distributor.pharma.com/msp
     export CORE_PEER_ADDRESS=localhost:9051
     export CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.distributor.pharma.com
-  elif [ $USING_ORG = "retailer" ]; then
+  elif [ "$USING_ORG" = "retailer" ]; then
     export CORE_PEER_LOCALMSPID="RetailerMSP"
     export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_RETAILER_CA
     export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/retailer.pharma.com/users/Admin@retailer.pharma.com/msp
