@@ -1,4 +1,3 @@
----
 Organizations:
     - &OrdererOrg
         Name: OrdererOrg
@@ -88,7 +87,7 @@ Capabilities:
     Orderer: &OrdererCapabilities
         V2_0: true
     Application: &ApplicationCapabilities
-        V2_0: true
+        V2_5: true
 
 Application: &ApplicationDefaults
     Organizations:
@@ -150,6 +149,8 @@ Orderer: &OrdererDefaults
         BlockValidation:
             Type: ImplicitMeta
             Rule: "ANY Writers"
+    Capabilities:
+        <<: *OrdererCapabilities
 
 Channel: &ChannelDefaults
     Policies:
@@ -166,29 +167,22 @@ Channel: &ChannelDefaults
         <<: *ChannelCapabilities
 
 Profiles:
-    PharmaOrdererGenesis:
+    # Profile for channel genesis block (Fabric 2.5 style)
+    PharmaChannel:
         <<: *ChannelDefaults
         Orderer:
             <<: *OrdererDefaults
             Organizations:
                 - *OrdererOrg
-            Capabilities:
-                <<: *OrdererCapabilities
-        Consortiums:
-            PharmaConsortium:
-                Organizations:
-                    - *Manufacturer
-                    - *Distributor
-                    - *Retailer
-
-    PharmaChannel:
-        Consortium: PharmaConsortium
-        <<: *ChannelDefaults
         Application:
             <<: *ApplicationDefaults
             Organizations:
                 - *Manufacturer
                 - *Distributor
                 - *Retailer
-            Capabilities:
-                <<: *ApplicationCapabilities
+        Consortiums:
+            PharmaConsortium:
+                Organizations:
+                    - *Manufacturer
+                    - *Distributor
+                    - *Retailer

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Main network control script for pharmaceutical supply chain
+# Main network control script for pharmaceutical supply chain - FIXED for Fabric 2.5
 
 export PATH=${PWD}/../fabric-samples/bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}/configtx
@@ -40,44 +40,43 @@ function createOrgs() {
   # Create crypto material for retailer
   cryptogen generate --config=./organizations/cryptogen/crypto-config-retailer.yaml --output="organizations"
   
-  echo "Generating CCP files for organizations..."
-  ./scripts/ccp-generate.sh
+  echo "Certificate generation complete"
 }
 
-# Generate genesis block and channel configuration
+# Generate genesis block and channel configuration - UPDATED FOR 2.5
 function createConsortium() {
-  echo "Generating Orderer Genesis block"
+  echo "Generating channel genesis block for Fabric 2.5"
   
-  configtxgen -profile PharmaOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+  # For Fabric 2.5, we create the genesis block directly for the application channel
+  # No system channel is needed
   
-  echo "Generating channel configuration transaction 'supply-chain-channel.tx'"
+  mkdir -p channel-artifacts
   
-  configtxgen -profile PharmaChannel -outputCreateChannelTx ./channel-artifacts/supply-chain-channel.tx -channelID supply-chain-channel
+  echo "Generating channel genesis block 'supply-chain-channel.block'"
   
-  echo "Generating anchor peer update transactions"
+  configtxgen -profile PharmaChannel -outputBlock ./channel-artifacts/supply-chain-channel.block -channelID supply-chain-channel
   
-  configtxgen -profile PharmaChannel -outputAnchorPeersUpdate ./channel-artifacts/ManufacturerMSPanchors.tx -channelID supply-chain-channel -asOrg ManufacturerMSP
-  
-  configtxgen -profile PharmaChannel -outputAnchorPeersUpdate ./channel-artifacts/DistributorMSPanchors.tx -channelID supply-chain-channel -asOrg DistributorMSP
-  
-  configtxgen -profile PharmaChannel -outputAnchorPeersUpdate ./channel-artifacts/RetailerMSPanchors.tx -channelID supply-chain-channel -asOrg RetailerMSP
+  echo "Channel genesis block generated successfully"
 }
 
 # Bring up the network using docker compose
 function networkUp() {
   # Create necessary directories
-  mkdir -p organizations system-genesis-block channel-artifacts
+  mkdir -p organizations channel-artifacts
   
   # Generate certificates
   createOrgs
   
-  # Generate genesis block
+  # Generate channel genesis block
   createConsortium
   
   # Bring up docker containers
   docker-compose -f ./docker/docker-compose-net.yaml up -d
   
   echo "Network is up!"
+  echo "Waiting for containers to be ready..."
+  sleep 5
+  
   echo "Run './network.sh createChannel' to create and join channel"
 }
 
@@ -90,7 +89,6 @@ function networkDown() {
   # Cleanup generated files
   rm -rf organizations/ordererOrganizations
   rm -rf organizations/peerOrganizations
-  rm -rf system-genesis-block
   rm -rf channel-artifacts
   rm -rf channel-artifacts/*.block
   

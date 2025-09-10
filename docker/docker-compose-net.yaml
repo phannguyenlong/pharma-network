@@ -16,10 +16,10 @@ networks:
     name: fabric_pharma
 
 services:
-  # Orderer nodes
+  # Orderer nodes - UPDATED FOR FABRIC 2.5 (No system channel)
   orderer1.pharma.com:
     container_name: orderer1.pharma.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -43,22 +43,24 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer1.pharma.com:9443
+      - ORDERER_METRICS_PROVIDER=prometheus
     working_dir: /root
     command: orderer
     volumes:
-      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/msp:/var/hyperledger/orderer/msp
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/tls/:/var/hyperledger/orderer/tls
       - orderer1.pharma.com:/var/hyperledger/production/orderer
     ports:
       - 7050:7050
       - 7053:7053
+      - 9443:9443
     networks:
       - pharma
 
   orderer2.pharma.com:
     container_name: orderer2.pharma.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -82,22 +84,24 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:8053
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer2.pharma.com:9444
+      - ORDERER_METRICS_PROVIDER=prometheus
     working_dir: /root
     command: orderer
     volumes:
-      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer2.pharma.com/msp:/var/hyperledger/orderer/msp
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer2.pharma.com/tls/:/var/hyperledger/orderer/tls
       - orderer2.pharma.com:/var/hyperledger/production/orderer
     ports:
       - 8050:8050
       - 8053:8053
+      - 9444:9444
     networks:
       - pharma
 
   orderer3.pharma.com:
     container_name: orderer3.pharma.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -121,16 +125,18 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:9053
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer3.pharma.com:9445
+      - ORDERER_METRICS_PROVIDER=prometheus
     working_dir: /root
     command: orderer
     volumes:
-      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer3.pharma.com/msp:/var/hyperledger/orderer/msp
       - ../organizations/ordererOrganizations/pharma.com/orderers/orderer3.pharma.com/tls/:/var/hyperledger/orderer/tls
       - orderer3.pharma.com:/var/hyperledger/production/orderer
     ports:
       - 9050:9050
       - 9053:9053
+      - 9445:9445
     networks:
       - pharma
 
@@ -150,7 +156,7 @@ services:
 
   peer0.manufacturer.pharma.com:
     container_name: peer0.manufacturer.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -170,7 +176,7 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.manufacturer.pharma.com:7051
       - CORE_PEER_LOCALMSPID=ManufacturerMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.manufacturer.pharma.com:9444
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.manufacturer.pharma.com:9446
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0manufacturer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
@@ -186,7 +192,7 @@ services:
     command: peer node start
     ports:
       - 7051:7051
-      - 9444:9444
+      - 9446:9446
     networks:
       - pharma
     depends_on:
@@ -207,7 +213,7 @@ services:
 
   peer1.manufacturer.pharma.com:
     container_name: peer1.manufacturer.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -227,7 +233,7 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.manufacturer.pharma.com:8051
       - CORE_PEER_LOCALMSPID=ManufacturerMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer1.manufacturer.pharma.com:9445
+      - CORE_OPERATIONS_LISTENADDRESS=peer1.manufacturer.pharma.com:9447
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer1manufacturer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
@@ -243,7 +249,7 @@ services:
     command: peer node start
     ports:
       - 8051:8051
-      - 9445:9445
+      - 9447:9447
     networks:
       - pharma
     depends_on:
@@ -265,7 +271,7 @@ services:
 
   peer0.distributor.pharma.com:
     container_name: peer0.distributor.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -285,7 +291,7 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.distributor.pharma.com:9051
       - CORE_PEER_LOCALMSPID=DistributorMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.distributor.pharma.com:9446
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.distributor.pharma.com:9448
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0distributor"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
@@ -301,7 +307,7 @@ services:
     command: peer node start
     ports:
       - 9051:9051
-      - 9446:9446
+      - 9448:9448
     networks:
       - pharma
     depends_on:
@@ -322,7 +328,7 @@ services:
 
   peer1.distributor.pharma.com:
     container_name: peer1.distributor.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -342,7 +348,7 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.distributor.pharma.com:10051
       - CORE_PEER_LOCALMSPID=DistributorMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer1.distributor.pharma.com:9447
+      - CORE_OPERATIONS_LISTENADDRESS=peer1.distributor.pharma.com:9449
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer1distributor"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
@@ -358,7 +364,7 @@ services:
     command: peer node start
     ports:
       - 10051:10051
-      - 9447:9447
+      - 9449:9449
     networks:
       - pharma
     depends_on:
@@ -380,7 +386,7 @@ services:
 
   peer0.retailer.pharma.com:
     container_name: peer0.retailer.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -400,7 +406,7 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.pharma.com:11051
       - CORE_PEER_LOCALMSPID=RetailerMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.retailer.pharma.com:9448
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.retailer.pharma.com:9450
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0retailer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
@@ -416,7 +422,7 @@ services:
     command: peer node start
     ports:
       - 11051:11051
-      - 9448:9448
+      - 9450:9450
     networks:
       - pharma
     depends_on:
@@ -437,7 +443,7 @@ services:
 
   peer1.retailer.pharma.com:
     container_name: peer1.retailer.pharma.com
-    image: hyperledger/fabric-peer:latest
+    image: hyperledger/fabric-peer:2.5
     labels:
       service: hyperledger-fabric
     environment:
@@ -457,12 +463,11 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.retailer.pharma.com:12051
       - CORE_PEER_LOCALMSPID=RetailerMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer1.retailer.pharma.com:9449
+      - CORE_OPERATIONS_LISTENADDRESS=peer1.retailer.pharma.com:9451
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer1retailer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1.retailer:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
@@ -473,7 +478,7 @@ services:
     command: peer node start
     ports:
       - 12051:12051
-      - 9449:9449
+      - 9451:9451
     networks:
       - pharma
     depends_on:
