@@ -1,0 +1,44 @@
+# organizations/ccp/ccp-template.yaml
+---
+name: pharma-network-${ORG}
+version: 1.0.0
+client:
+  organization: ${ORG}
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  ${ORG}:
+    mspid: ${ORG}MSP
+    peers:
+      - peer0.${ORG}.pharma.com
+      - peer1.${ORG}.pharma.com
+    certificateAuthorities:
+      - ca.${ORG}.pharma.com
+peers:
+  peer0.${ORG}.pharma.com:
+    url: grpcs://localhost:${P0PORT}
+    tlsCACerts:
+      pem: |
+        ${PEERPEM}
+    grpcOptions:
+      ssl-target-name-override: peer0.${ORG}.pharma.com
+      hostnameOverride: peer0.${ORG}.pharma.com
+  peer1.${ORG}.pharma.com:
+    url: grpcs://localhost:${P1PORT}
+    tlsCACerts:
+      pem: |
+        ${PEERPEM}
+    grpcOptions:
+      ssl-target-name-override: peer1.${ORG}.pharma.com
+      hostnameOverride: peer1.${ORG}.pharma.com
+certificateAuthorities:
+  ca.${ORG}.pharma.com:
+    url: https://localhost:${CAPORT}
+    caName: ca-${ORG}
+    tlsCACerts:
+      pem: |
+        ${CAPEM}
+    httpOptions:
+      verify: false

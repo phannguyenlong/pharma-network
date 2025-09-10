@@ -1,0 +1,41 @@
+# organizations/ccp/connection-distributor.yaml
+
+name: pharma-network-distributor
+version: 1.0.0
+client:
+  organization: Distributor
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  Distributor:
+    mspid: DistributorMSP
+    peers:
+      - peer0.distributor.pharma.com
+      - peer1.distributor.pharma.com
+    certificateAuthorities:
+      - ca.distributor.pharma.com
+peers:
+  peer0.distributor.pharma.com:
+    url: grpcs://localhost:9051
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/distributor.pharma.com/tlsca/tlsca.distributor.pharma.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer0.distributor.pharma.com
+      hostnameOverride: peer0.distributor.pharma.com
+  peer1.distributor.pharma.com:
+    url: grpcs://localhost:10051
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/distributor.pharma.com/tlsca/tlsca.distributor.pharma.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer1.distributor.pharma.com
+      hostnameOverride: peer1.distributor.pharma.com
+certificateAuthorities:
+  ca.distributor.pharma.com:
+    url: https://localhost:8054
+    caName: ca-distributor
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/distributor.pharma.com/ca/ca.distributor.pharma.com-cert.pem
+    httpOptions:
+      verify: false

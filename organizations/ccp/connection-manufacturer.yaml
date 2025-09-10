@@ -1,0 +1,41 @@
+# organizations/ccp/connection-manufacturer.yaml
+
+name: pharma-network-manufacturer
+version: 1.0.0
+client:
+  organization: Manufacturer
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  Manufacturer:
+    mspid: ManufacturerMSP
+    peers:
+      - peer0.manufacturer.pharma.com
+      - peer1.manufacturer.pharma.com
+    certificateAuthorities:
+      - ca.manufacturer.pharma.com
+peers:
+  peer0.manufacturer.pharma.com:
+    url: grpcs://localhost:7051
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/manufacturer.pharma.com/tlsca/tlsca.manufacturer.pharma.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer0.manufacturer.pharma.com
+      hostnameOverride: peer0.manufacturer.pharma.com
+  peer1.manufacturer.pharma.com:
+    url: grpcs://localhost:8051
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/manufacturer.pharma.com/tlsca/tlsca.manufacturer.pharma.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer1.manufacturer.pharma.com
+      hostnameOverride: peer1.manufacturer.pharma.com
+certificateAuthorities:
+  ca.manufacturer.pharma.com:
+    url: https://localhost:7054
+    caName: ca-manufacturer
+    tlsCACerts:
+      path: ../../organizations/peerOrganizations/manufacturer.pharma.com/ca/ca.manufacturer.pharma.com-cert.pem
+    httpOptions:
+      verify: false

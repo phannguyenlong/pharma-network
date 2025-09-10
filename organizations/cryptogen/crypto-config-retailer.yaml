@@ -1,0 +1,8 @@
+PeerOrgs:
+  - Name: Retailer
+    Domain: retailer.pharma.com
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 2
