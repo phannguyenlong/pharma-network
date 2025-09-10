@@ -169,7 +169,7 @@ vm:
                 file: docker/tls.key
         attachStdout: false
         hostConfig:
-            NetworkMode: host
+            NetworkMode: fabric_pharma
             LogConfig:
                 Type: json-file
                 Config:

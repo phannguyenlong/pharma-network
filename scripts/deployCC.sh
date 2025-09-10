@@ -7,10 +7,10 @@ export FABRIC_CFG_PATH=${PWD}/configtx
 . scripts/envVar.sh
 
 CHANNEL_NAME="supply-chain-channel"
-CC_NAME="pharma-supply"
-CC_SRC_PATH="./chaincode/pharma-supply"
-CC_VERSION="1.0"
-CC_SEQUENCE="1"
+CC_NAME="${CC_NAME:-pharma-supply}"
+CC_SRC_PATH="${CC_SRC_PATH:-./chaincode/pharma-supply}"
+CC_VERSION="${CC_VERSION:-1.0}"
+CC_SEQUENCE="${CC_SEQUENCE:-1}"
 CC_INIT_FCN="InitLedger"
 CC_INVOKE_FCN="CreateProduct"
 

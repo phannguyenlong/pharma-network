@@ -5,6 +5,31 @@ const { Contract } = require('fabric-contract-api');
 
 class PharmaSupplyContract extends Contract {
     
+    // Convert Fabric transaction timestamp to ISO string deterministically across peers
+    getTxTimestampISO(ctx) {
+        const ts = ctx.stub.getTxTimestamp();
+        try {
+            const seconds = typeof ts.seconds === 'number' ? ts.seconds : (ts.seconds.low !== undefined ? ts.seconds.low : (ts.seconds.toInt ? ts.seconds.toInt() : parseInt(ts.seconds)));
+            const millis = seconds * 1000 + Math.floor((ts.nanos || 0) / 1e6);
+            return new Date(millis).toISOString();
+        } catch (e) {
+            // Fallback in unlikely case of parsing issues
+            return new Date(0).toISOString();
+        }
+    }
+    
+    // Get Fabric transaction timestamp as Date object
+    getTxDate(ctx) {
+        const ts = ctx.stub.getTxTimestamp();
+        try {
+            const seconds = typeof ts.seconds === 'number' ? ts.seconds : (ts.seconds.low !== undefined ? ts.seconds.low : (ts.seconds.toInt ? ts.seconds.toInt() : parseInt(ts.seconds)));
+            const millis = seconds * 1000 + Math.floor((ts.nanos || 0) / 1e6);
+            return new Date(millis);
+        } catch (e) {
+            return new Date(0);
+        }
+    }
+    
     async InitLedger(ctx) {
         console.log('Initializing pharmaceutical supply chain ledger');
         
@@ -59,7 +84,7 @@ class PharmaSupplyContract extends Contract {
             location: 'Manufacturing Facility',
             temperature: '20C',
             verified: true,
-            timestamp: new Date().toISOString()
+            timestamp: this.getTxTimestampISO(ctx)
         };
         
         await ctx.stub.putState(productId, Buffer.from(JSON.stringify(product)));
@@ -76,13 +101,13 @@ class PharmaSupplyContract extends Contract {
         const product = JSON.parse(productBytes.toString());
         
         // Verify product before transfer
-        if (!this.verifyProduct(product)) {
+        if (!this.verifyProduct(ctx, product)) {
             throw new Error(`Product ${productId} verification failed`);
         }
         
         product.owner = newOwner;
         product.location = location;
-        product.lastTransfer = new Date().toISOString();
+        product.lastTransfer = this.getTxTimestampISO(ctx);
         
         // Update status based on new owner
         if (newOwner === 'distributor') {
@@ -116,7 +141,7 @@ class PharmaSupplyContract extends Contract {
         const product = JSON.parse(productBytes.toString());
         product.status = status;
         product.temperature = temperature;
-        product.lastUpdate = new Date().toISOString();
+        product.lastUpdate = this.getTxTimestampISO(ctx);
         
         await ctx.stub.putState(productId, Buffer.from(JSON.stringify(product)));
         return JSON.stringify(product);
@@ -170,7 +195,7 @@ class PharmaSupplyContract extends Contract {
     }
     
     // Verify product authenticity (simplified)
-    verifyProduct(product) {
+    verifyProduct(ctx, product) {
         // Check if product has required fields
         if (!product.productId || !product.manufacturer || !product.batchNumber) {
             return false;
@@ -178,8 +203,8 @@ class PharmaSupplyContract extends Contract {
         
         // Check if product is not expired
         const expiryDate = new Date(product.expiryDate);
-        const currentDate = new Date();
-        if (expiryDate < currentDate) {
+        const txDate = this.getTxDate(ctx);
+        if (expiryDate < txDate) {
             return false;
         }
         
@@ -201,7 +226,7 @@ class PharmaSupplyContract extends Contract {
         const product = JSON.parse(productBytes.toString());
         product.verified = false;
         product.status = 'COUNTERFEIT';
-        product.alertRaised = new Date().toISOString();
+        product.alertRaised = this.getTxTimestampISO(ctx);
         
         await ctx.stub.putState(productId, Buffer.from(JSON.stringify(product)));
         return JSON.stringify(product);
