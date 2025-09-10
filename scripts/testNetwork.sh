@@ -33,13 +33,21 @@ list_system() {
   docker-compose -f ./docker/docker-compose-net.yaml ps
 
   header "Orderer channel participation"
-  for ord in 1 2 3; do
-    echo "-- orderer${ord}.pharma.com --"
+  # Admin endpoints and per-orderer admin client certs/keys
+  declare -a ORDERERS=(
+    "orderer1.pharma.com 7053 organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/tls/server.crt organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/tls/server.key"
+    "orderer2.pharma.com 8053 organizations/ordererOrganizations/pharma.com/orderers/orderer2.pharma.com/tls/server.crt organizations/ordererOrganizations/pharma.com/orderers/orderer2.pharma.com/tls/server.key"
+    "orderer3.pharma.com 9053 organizations/ordererOrganizations/pharma.com/orderers/orderer3.pharma.com/tls/server.crt organizations/ordererOrganizations/pharma.com/orderers/orderer3.pharma.com/tls/server.key"
+  )
+  CA_FILE="organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/msp/tlscacerts/tlsca.pharma.com-cert.pem"
+  for entry in "${ORDERERS[@]}"; do
+    read -r ORD_HOST ORD_PORT ORD_CERT ORD_KEY <<<"$entry"
+    echo "-- ${ORD_HOST} --"
     osnadmin channel list \
-      -o localhost:$((7000 + ord*100 + 53)) \
-      --ca-file organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/msp/tlscacerts/tlsca.pharma.com-cert.pem \
-      --client-cert organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/tls/server.crt \
-      --client-key organizations/ordererOrganizations/pharma.com/orderers/orderer1.pharma.com/tls/server.key || true
+      -o localhost:${ORD_PORT} \
+      --ca-file ${CA_FILE} \
+      --client-cert ${ORD_CERT} \
+      --client-key ${ORD_KEY} || true
     echo ""
   done
 }
