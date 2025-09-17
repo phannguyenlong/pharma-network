@@ -1,37 +1,36 @@
 import axios from 'axios'
-import { useOrg } from '../state/org.jsx'
 
-function normalize(data) {
-  if (typeof data === 'string') {
-    try { return JSON.parse(data) } catch { return data }
-  }
-  if (Array.isArray(data) && data.length && typeof data[0] === 'number') {
-    try {
-      const text = new TextDecoder().decode(Uint8Array.from(data))
-      try { return JSON.parse(text) } catch { return text }
-    } catch {}
-  }
-  if (data && typeof data === 'object') {
-    // Server may already decode; pass through
-    return data
-  }
-  return data
+const client = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+export const api = {
+  // Product operations
+  getProducts: (org) => 
+    client.get('/products', { headers: { 'x-org': org } }).then(res => res.data),
+  
+  getProduct: (id, org) => 
+    client.get(`/products/${id}`, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  createProduct: (data, org) => 
+    client.post('/products', data, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  updateStatus: (id, data, org) => 
+    client.post(`/products/${id}/status`, data, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  transfer: (id, data, org) => 
+    client.post(`/products/${id}/transfer`, data, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  getHistory: (id, org) => 
+    client.get(`/products/${id}/history`, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  markCounterfeit: (id, org) => 
+    client.post(`/products/${id}/counterfeit`, {}, { headers: { 'x-org': org } }).then(res => res.data),
+  
+  // Network monitoring
+  getChannelInfo: (org) => 
+    client.get('/monitor/channel', { headers: { 'x-org': org } }).then(res => res.data),
 }
-
-export function useApi() {
-  const { org } = useOrg()
-  const client = axios.create({ headers: { 'x-org': org } })
-  return {
-    health: async () => normalize((await client.get('/health')).data),
-    channelInfo: async () => normalize((await client.get('/api/monitor/channel')).data),
-    listProducts: async () => normalize((await client.get('/api/products')).data),
-    getProduct: async (id) => normalize((await client.get(`/api/products/${id}`)).data),
-    createProduct: async (payload) => normalize((await client.post('/api/products', payload)).data),
-    updateStatus: async (id, payload) => normalize((await client.post(`/api/products/${id}/status`, payload)).data),
-    transfer: async (id, payload) => normalize((await client.post(`/api/products/${id}/transfer`, payload)).data),
-    history: async (id) => normalize((await client.get(`/api/products/${id}/history`)).data),
-    markCounterfeit: async (id) => normalize((await client.post(`/api/products/${id}/counterfeit`)).data),
-  }
-}
-
-
