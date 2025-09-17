@@ -33,4 +33,6 @@ pharma-supply.tar.gz
 # Docker compose overrides/local
 docker-compose.override.yml
 
-
+# web
+package-lock.json
+log.txt

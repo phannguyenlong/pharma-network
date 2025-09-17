@@ -25,3 +25,9 @@ osnadmin channel list -o localhost:7053 \
 
 # deploy the chaincode
 ./network.sh deployCC
+
+
+# for server to access
+chmod 777 /project/pharma-network/organizations/peerOrganizations/manufacturer.pharma.com/users/Admin@manufacturer.pharma.com/msp/keystore/priv_sk
+chmod 777 /project/pharma-network/organizations/peerOrganizations/distributor.pharma.com/users/Admin@distributor.pharma.com/msp/keystore/priv_sk
+chmod 777 /project/pharma-network/organizations/peerOrganizations/retailer.pharma.com/users/Admin@retailer.pharma.com/msp/keystore/priv_sk
